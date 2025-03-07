@@ -1,0 +1,49 @@
+@startuml
+class HistoryController {
+    + getHistory(uid: String, timeline: long): History
+}
+
+class SummaryRepository {
+    + findAllByUserId(uid: String, timeline: Date, limit: int): List<Summary>
+}
+
+class ArticleRepository {
+    + findAllByIds(articleIds: List<String>): List<Article>
+}
+
+class History {
+    - items: List<HistoryItem>
+    - timeline: long
+}
+
+class HistoryItem {
+    - summary: Summary
+    - article: Article
+}
+
+class Summary {
+    + id: String
+    + userId: String
+    + content: String
+    + timestamp: Date
+}
+
+class Article {
+    + id: String
+    + title: String
+    + content: String
+    + timestamp: Date
+}
+
+interface Database
+
+HistoryController --> SummaryRepository : interacts with
+HistoryController --> ArticleRepository : interacts with
+HistoryController --> History : handles
+SummaryRepository --> Database : interacts with
+SummaryRepository --> Summary : handles
+ArticleRepository --> Database : interacts with
+History *-- HistoryItem : contains
+HistoryItem --> Summary
+HistoryItem --> Article
+@enduml

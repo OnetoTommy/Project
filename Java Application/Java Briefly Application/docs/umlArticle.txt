@@ -1,0 +1,32 @@
+@startuml
+class ArticleController {
+    + getArticleById(id: String): Article
+    + getLatestArticle(): Article
+    + updateNewsAndFetchLatest(): Article
+}
+
+class NewsService {
+    + getLatest(): Article
+}
+
+class ArticleRepository {
+    + findById(id: String): Article
+    + findLatest(): Article
+    + findByDate(date: Date): Article
+    + save(article: Article): void
+}
+
+class Article {
+    + id: String
+    + date: Date
+    + title: String
+    + content: String
+}
+
+ArticleController --> NewsService : uses
+ArticleController --> ArticleRepository : interacts with
+NewsService --> ExternalAPI : fetches
+ArticleRepository --> Database : interacts with
+ArticleRepository --> Article : handles
+
+@enduml

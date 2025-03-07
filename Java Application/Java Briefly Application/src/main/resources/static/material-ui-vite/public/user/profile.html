@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Interactive Calendar with Month Selection</title>
+        <link rel="stylesheet" href="./profile.css" />
+        <!-- import ApiClient.js -->
+        <!-- <script src=" /Users/ebunadebesin/Desktop/finalproject5100/src/main/resources/static/material-ui-vite/src/Services/ApiClient.js"></script> -->
+
+        <link
+            href="https://cdn.muicss.com/mui-0.10.3/css/mui.min.css"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <script src="https://cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+        <!-- <script type="module" src="./profile.js" defer></script> -->
+
+        <style>
+            /* Modalstyles */
+
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+
+            .modal-content {
+                background-color: #fefefe;
+                margin: 15% auto;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 80%;
+                max-width: 500px;
+                text-align: center;
+            }
+
+            .close {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .close:hover,
+            .close:focus {
+                color: black;
+                text-decoration: none;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="profile">
+            <h2>Profile</h2>
+        </div>
+
+        <hr
+            style="
+                width: 100%;
+                height: 1px;
+                background-color: rgb(158, 158, 158);
+                border: none;
+            "
+        />
+
+        <div>
+            <img src="./avatar.jpg" class="image" />
+        </div>
+        <div>
+            <span class="names">HUSKY</span>
+        </div>
+        <br />
+        <div class="calendar">
+            <div class="calendar-`header">
+                <button
+                    class="mui-btn mui-btn--small mui-btn--primary"
+                    onclick="changeMonth(-1)"
+                >
+                    &#8249;
+                </button>
+                <span id="month-year"></span>
+                <button
+                    class="mui-btn mui-btn--small mui-btn--primary"
+                    onclick="changeMonth(1)"
+                >
+                    &#8250;
+                </button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SUN</th>
+                        <th>MON</th>
+                        <th>TUE</th>
+                        <th>WED</th>
+                        <th>THU</th>
+                        <th>FRI</th>
+                        <th>SAT</th>
+                    </tr>
+                </thead>
+                <tbody id="calendar-body"></tbody>
+            </table>
+        </div>
+
+        <div class="selected-date" id="selected-date"></div>
+
+        <!-- Modal for history information -->
+        <div id="history-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>History Information</h2>
+                <div id="history-details">
+                    Select a date to view history information.
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <button
+                id="logoutButton"
+                class="mui-btn mui-btn--small mui-btn--danger"
+            >
+                Logout
+            </button>
+        </div>
+
+        <script>
+            const selectedDateDisplay =
+                document.getElementById("selected-date");
+            const monthYearDisplay = document.getElementById("month-year");
+            const calendarBody = document.getElementById("calendar-body");
+
+            let currentYear = new Date().getFullYear();
+            let currentMonth = new Date().getMonth();
+
+            // 今天的日期
+            const today = new Date();
+            const todayYear = today.getFullYear();
+            const todayMonth = today.getMonth();
+            const todayDate = today.getDate();
+
+            // async function fetchFeedbackDates() {
+            //     try {
+            //         const userId = getCookieValue("username"); // Ensure this cookie exists
+
+            //         // Call the backend API with the proper parameters
+            //         const response = await fetch(
+            //             `http://localhost:8080/api/summaries/feedbackDates?userId=${userId}`
+            //         );
+
+            //         if (!response.ok) {
+            //             throw new Error("Failed to fetch feedback dates");
+            //         }
+
+            //         // Assuming the backend returns a list of feedback objects, we only need the dates for the feedback
+            //         const feedbackList = await response.json(); // This will return the full feedback list
+            //         return feedbackList
+            //         .map(dateString => new Date(dateString))
+            //         .filter(date => date.getFullYear() === currentYear && date.getMonth() === currentMonth)
+            //         .map(date => date.getDate());
+
+            //     } catch (error) {
+            //         console.error("Error fetching feedback dates:", error);
+            //         return []; // Return an empty array if there's an error
+            //     }
+            // }
+
+            async function fetchFeedbackDates() {
+                try {
+                    const userId = getCookieValue("username"); // Ensure this cookie exists
+                    const response = await fetch(
+                        `/api/summaries/feedbackDates?userId=${userId}`
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch feedback dates");
+                    }
+
+                    const feedbackList = await response.json(); // This will return the full feedback list
+
+                    // Convert strings to Date objects and filter for the current month
+                    const feedbackDates = feedbackList
+                        .map((dateString) => {
+                            // Force the date to midnight to avoid timezone issues
+                            const date = new Date(dateString + "T00:00:00");
+                            // console.log(`Parsed date: ${date.toISOString()} from ${dateString}`); // Debugging the parsed date
+                            return date;
+                        })
+                        .filter(
+                            (date) =>
+                                date.getFullYear() === currentYear && // Match the year
+                                date.getMonth() === currentMonth // Match the month
+                        )
+                        .map((date) => date.getDate()); // Extract the day of the month
+
+                    // console.log("Filtered feedback dates:", feedbackDates); // Log the filtered dates
+                    return feedbackDates;
+                } catch (error) {
+                    console.error("Error fetching feedback dates:", error);
+                    return []; // Return an empty array if there's an error
+                }
+            }
+
+            async function renderCalendar() {
+                calendarBody.innerHTML = ""; // Clear the calendar body
+                const firstDay = new Date(
+                    currentYear,
+                    currentMonth,
+                    1
+                ).getDay(); // First day of the month
+                const daysInMonth = new Date(
+                    currentYear,
+                    currentMonth + 1,
+                    0
+                ).getDate(); // Total days in the current month
+
+                // Update the month and year display
+                monthYearDisplay.textContent = `${new Date(
+                    currentYear,
+                    currentMonth
+                ).toLocaleString("default", { month: "long" })} ${currentYear}`;
+
+                // Fetch feedback dates for the current month
+                const feedbackDates = await fetchFeedbackDates();
+                console.log("Feedback Dates:", feedbackDates);
+
+                let date = 1;
+                for (let i = 0; i < 6; i++) {
+                    // Maximum of 6 rows in the calendar (weeks)
+                    const row = document.createElement("tr");
+
+                    for (let j = 0; j < 7; j++) {
+                        const cell = document.createElement("td");
+
+                        // If it's before the first day of the month, leave the cell empty
+                        if (i === 0 && j < firstDay) {
+                            cell.textContent = "";
+                        } else if (date > daysInMonth) {
+                            // If the date exceeds the number of days in the month, leave the cell empty
+                            cell.textContent = "";
+                        } else {
+                            // Display the day number
+                            cell.textContent = date;
+
+                            // Highlight today's date
+                            if (
+                                currentYear === todayYear &&
+                                currentMonth === todayMonth &&
+                                date === todayDate
+                            ) {
+                                cell.classList.add("selected");
+                            }
+
+                            // Highlight dates that have feedback
+                            if (feedbackDates.includes(date)) {
+                                cell.classList.add("has-feedback");
+                                cell.title = "Feedback available";
+                            }
+
+                            // Add event listener to each date cell to allow for date selection
+                            cell.addEventListener("click", function () {
+                                selectDate(cell);
+                            });
+
+                            // Move to the next date
+                            date++;
+                        }
+
+                        row.appendChild(cell);
+                    }
+                    calendarBody.appendChild(row);
+                }
+            }
+
+            function selectDate(cell) {
+                document
+                    .querySelectorAll(".calendar td")
+                    .forEach((c) => c.classList.remove("selected"));
+                if (cell.textContent) {
+                    cell.classList.add("selected");
+                    showHistoryModal(cell.textContent);
+                }
+            }
+
+            // Function to show the modal with feedback history information
+            async function showHistoryModal(date) {
+                const historyModal = document.getElementById("history-modal");
+                const historyDetails =
+                    document.getElementById("history-details");
+                const monthYear = monthYearDisplay.textContent;
+
+                // Format the selected date for API query
+                const submissionDate = `${currentYear}-${String(
+                    currentMonth + 1
+                ).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
+                // console.log("Formatted submissionDate:", submissionDate);
+
+                // Display loading state in the modal
+                historyDetails.textContent = "Loading feedback...";
+                historyModal.style.display = "block";
+
+                try {
+                    // Fetch feedback from the backend
+                    const userId = getCookieValue("username"); // Ensure this cookie exists
+                    const response = await fetch(
+                        `/api/summaries/feedback?userId=${userId}&submissionDate=${submissionDate}`
+                    );
+                    //console.log(`Fetch URL: http://localhost:8080/api/summaries/feedback?userId=${userId}&submissionDate=${submissionDate}`);
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch feedback");
+                    }
+
+                    const feedbackList = await response.json();
+
+                    // Populate modal with feedback data
+                    if (feedbackList.length > 0) {
+                        historyDetails.innerHTML = `
+                    <h3>Feedback for ${monthYear} ${date}</h3>
+                    <ul>
+                        ${feedbackList
+                            .map(
+                                (feedback) => `
+                                
+                                    <strong>Your Summary:</strong> ${
+                                        feedback.userSummary || "N/A"
+                                    }<br />
+                                    <strong>Score:</strong> ${
+                                        feedback.score || "N/A"
+                                    }<br />
+                                    <strong>Your Feedback:</strong> ${
+                                        feedback.feedback || "No comments"
+                                    }
+                                
+                            `
+                            )
+                            .join("")}
+                    </ul>
+                `;
+                    } else {
+                        historyDetails.textContent = `No feedback found for ${monthYear} ${date}.`;
+                    }
+                } catch (error) {
+                    console.error("Error fetching feedback:", error);
+                    historyDetails.textContent =
+                        "An error occurred while fetching feedback.";
+                }
+            }
+
+            // Function to close the modal
+            function closeModal() {
+                document.getElementById("history-modal").style.display = "none";
+            }
+
+            // Close the modal if the user clicks outside of it
+            window.onclick = function (event) {
+                const modal = document.getElementById("history-modal");
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
+
+            function changeMonth(step) {
+                currentMonth += step;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                } else if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar();
+            }
+
+            renderCalendar();
+
+            function getCookieValue(cookieName) {
+                // Find the cookie using a regular expression
+                const cookieMatch = document.cookie.match(
+                    `(?:^|; )${cookieName}=([^;]*)`
+                );
+                return cookieMatch ? decodeURIComponent(cookieMatch[1]) : null; // Decode the value and return it
+            }
+
+            // Example usage for adding username from API:
+            document.addEventListener("DOMContentLoaded", () => {
+                const username = getCookieValue("username");
+                const email = getCookieValue("email");
+
+                console.log("Username from cookie:", username);
+                //console.log("Email from cookie:", email);
+
+                const usernameSpan = document.querySelector(".names");
+                usernameSpan.textContent = username || "Demo"; // Set username or default to "Demo"
+            });
+
+            document
+                .getElementById("logoutButton")
+                .addEventListener("click", function () {
+                    // Remove cookies
+                    document.cookie =
+                        "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    document.cookie =
+                        "email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+                    // Reset the username on the page
+                    const usernameSpan = document.querySelector(".names");
+                    usernameSpan.textContent = "Demo"; // Set to default value
+
+                    // Optionally redirect to the login page (if you have one)
+                    window.location.href = "./signin.html"; // Uncomment this if you want to redirect
+
+                    // Show a message or alert for successful logout
+                    alert("You have been logged out.");
+                });
+        </script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/@iframe-resizer/child"
+            type="text/javascript"
+            async
+        ></script>
+    </body>
+</html>

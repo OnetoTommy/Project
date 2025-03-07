@@ -1,0 +1,162 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.profile {
+    margin-left: 30px;
+    /* display: block; */
+    align-self: flex-start;
+    /* Align only this element to the start (left) */
+    text-align: left;
+}
+
+.horizontal-line {
+    border-top: 1px solid rgb(135, 135, 135);
+    /* Create a thin horizontal line */
+    width: 100%;
+    /* Ensure it spans the container width */
+    height: 0;
+    /* No vertical space */
+    margin: 10px 0px 40px;
+    /* Space around the line */
+}
+
+
+
+.selected {
+    background-color: #4caf50; /* Example: green for today's date */
+    color: white;
+}
+
+
+.calendar {
+    width: auto;
+    border: 1px solid #ddd;
+    padding: 15px;
+    text-align: center;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+
+.has-feedback {
+    background-color: #81faa5; /* Light yellow */
+    border-radius: 50%; /* Make it look like a marker */
+    font-weight: bold;
+    cursor: pointer; /* Indicate interactivity */
+}
+
+.calendar table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.calendar th,
+.calendar td {
+    width: 15.28%;
+    padding: 8px;
+    cursor: pointer;
+    color: #555;
+}
+
+.calendar td:hover {
+    background-color: #f0f0f0;
+}
+
+.calendar td.selected {
+    background-color: #a3d4f7;
+    border-radius: 50%;
+}
+
+.selected-date {
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.names {
+    font-weight: bold;
+    font-size: x-large;
+}
+
+.image {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+hr {
+    margin-top: 10px;
+    margin-bottom: 40px;
+}
+
+/* .modal-content {
+    margin-top: 100px;
+    position: fixed;
+    text-align: justify;
+    top: 20%;
+    /* 距离窗口顶部 50% 
+    left: 50%;
+    /* 距离窗口左侧 50% 
+    transform: translate(-50%, -50%);
+    overflow: auto;
+    z-index: 1000; /* Ensure it stays on top 
+    
+} */
+
+/* Modal container styling */
+.modal {
+    display: none; /* Initially hidden */
+    position: fixed;
+    z-index: 1000; /* Ensure it's on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Allow modal content to scroll if it exceeds viewport height */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+}
+
+/* Modal content box styling */
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto; /* Center vertically and horizontally */
+    padding: 20px;
+    border-radius: 5px;
+    width: 80%;
+    max-width: 600px; /* Optional: Limit the maximum width */
+    max-height: 70vh; /* Restrict height to 70% of the viewport */
+    overflow-y: auto; /* Enable vertical scrolling inside the modal */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Close button styling */
+.close {
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+}
+
+/* Optional: Add hover effect for close button */
+.close:hover {
+    color: #f00;
+}
