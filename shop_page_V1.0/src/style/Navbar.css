@@ -1,0 +1,12 @@
+/* Custom offcanvas width: 1/3 of screen */
+@media (max-width: 768px) {
+  .custom-offcanvas-width {
+    width: 33.333vw !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .custom-offcanvas-width {
+    width: 400px; /* Optional for desktop preview */
+  }
+}
